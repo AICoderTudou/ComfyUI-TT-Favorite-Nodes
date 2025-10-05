@@ -1,0 +1,7 @@
+# ComfyUI Node History Plugin Dependencies
+# This plugin primarily uses Python standard library
+# No additional dependencies required for basic functionality
+
+# Optional dependencies for enhanced features:
+# requests>=2.25.0  # For future API integrations
+# pillow>=8.0.0     # For image processing if needed
