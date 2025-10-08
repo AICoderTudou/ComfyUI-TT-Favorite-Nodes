@@ -743,33 +743,32 @@ function TTaddToHistory(nodeType, nodeTitle) {
 
 // 鼠标坐标跟踪
 function TTsetupMouseTracking() {
-    console.log('TT Setting up mouse tracking');
+    console.log('TT Setting up position tracking based on button position');
     
-    // 跟踪鼠标移动
-    document.addEventListener('mousemove', function(e) {
-        TTlastMousePosition.x = e.clientX;
-        TTlastMousePosition.y = e.clientY;
-    });
+    // 更新TTlastMousePosition为悬浮按钮附近的位置
+    window.TTupdatePositionFromButton = function() {
+        // 在悬浮按钮右侧偏移较小距离创建节点，考虑按钮大小
+        TTlastMousePosition.x = TTbuttonPosition.x ; // 按钮右侧45px（按钮宽度约40px）
+        TTlastMousePosition.y = TTbuttonPosition.y ; // 按钮下方10px，更接近按钮
+        console.log('TT Updated node creation position to:', TTlastMousePosition);
+        console.log('TT Button position:', TTbuttonPosition);
+    };
     
-    // 跟踪右键点击
-    document.addEventListener('contextmenu', function(e) {
-        TTlastMousePosition.x = e.clientX;
-        TTlastMousePosition.y = e.clientY;
-    });
+    // 初始设置位置
+    window.TTupdatePositionFromButton();
     
-    // 跟踪普通点击
-    document.addEventListener('click', function(e) {
-        TTlastMousePosition.x = e.clientX;
-        TTlastMousePosition.y = e.clientY;
-    });
-    
-    console.log('TT Mouse tracking setup complete');
+    console.log('TT Position tracking setup complete, nodes will be created near button');
 }
 
 function TTcreateNodeFromType(nodeType) {
     console.log('TT Creating node:', nodeType);
     
     try {
+        // 确保使用最新的按钮位置更新节点创建坐标
+        if (window.TTupdatePositionFromButton) {
+            window.TTupdatePositionFromButton();
+        }
+        
         // 计算节点创建位置
         let nodePos = [TTlastMousePosition.x, TTlastMousePosition.y];
         
@@ -777,9 +776,17 @@ function TTcreateNodeFromType(nodeType) {
         if (window.app && window.app.canvas) {
             const canvas = window.app.canvas;
             if (canvas.ds && canvas.ds.scale) {
-                // 考虑缩放和偏移
-                nodePos[0] = (TTlastMousePosition.x - canvas.ds.offset[0]) / canvas.ds.scale;
-                nodePos[1] = (TTlastMousePosition.y - canvas.ds.offset[1]) / canvas.ds.scale;
+                // 考虑缩放和偏移，使用更精确的坐标转换
+                // 屏幕坐标转换为canvas坐标
+                nodePos[0] = (TTlastMousePosition.x - canvas.ds.offset[0]);
+                nodePos[1] = (TTlastMousePosition.y - canvas.ds.offset[1]);
+                
+                console.log('TT Canvas transform info:', {
+                    scale: canvas.ds.scale,
+                    offset: canvas.ds.offset,
+                    screenPos: TTlastMousePosition,
+                    canvasPos: nodePos
+                });
             }
         }
         
@@ -1078,6 +1085,11 @@ function TTcreateButton() {
             
             // 保存位置
             TTsaveButtonPosition();
+            
+            // 更新节点创建位置
+            if (window.TTupdatePositionFromButton) {
+                window.TTupdatePositionFromButton();
+            }
             
             // 如果拖拽时间很短，视为点击
             const dragDuration = Date.now() - TTdragStartTime;
