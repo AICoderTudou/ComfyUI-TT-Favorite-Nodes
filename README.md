@@ -78,7 +78,6 @@ ComfyUI-nodeHistory/
 
 
 ## 👨‍💻 关于AI代码侠土豆
-COZE智能体榜首开发者
 10年+研发  2025All in AI
 AI插件开发者
 专注AI领域
